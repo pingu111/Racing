@@ -5,8 +5,11 @@ using UnityEngine.SceneManagement;
 // Script that change the scenes 
 public class SceneChanger : MonoBehaviour {
 
-	// Use this for initialization
-	void Start ()
+    // The number of the Racing level that need to be loaded
+    public int nbLevelToLoad;
+
+    // Use this for initialization
+    void Start ()
     {
         DontDestroyOnLoad(this);
     }
@@ -27,5 +30,13 @@ public class SceneChanger : MonoBehaviour {
     public void goToMainMenuScene()
     {
         SceneManager.LoadScene("MainMenu");
+    }
+
+    // Change the scene and launch the main menu
+    public void goToLevel(int nbLevel)
+    {
+        nbLevelToLoad = nbLevel;
+        // TODO generer les niveaux dans MainRacing
+        SceneManager.LoadScene("MainRacing");
     }
 }
