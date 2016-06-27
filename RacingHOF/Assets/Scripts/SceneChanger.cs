@@ -22,4 +22,10 @@ public class SceneChanger : MonoBehaviour {
     {
         SceneManager.LoadScene("SelectLevel");
     }
+
+    // Change the scene and launch the main menu
+    public void goToMainMenuScene()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
 }
