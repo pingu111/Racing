@@ -22,11 +22,17 @@ public class CameraFollow : MonoBehaviour {
         // We follow the gameObject 
 
         Vector3 velocity = Vector3.zero;
-        Vector3 forward = objectToFollow.transform.forward * 10.0f;
-        Vector3 needPos = objectToFollow.transform.position - forward;
-        transform.position = Vector3.SmoothDamp(transform.position, needPos,
-                                                ref velocity, 0.05f);
+        Vector3 needPos = objectToFollow.transform.position;
+
+        // We go back a little
+        needPos.z -= objectToFollow.transform.GetComponent<Collider>().bounds.size.z ;
+        needPos.y += objectToFollow.transform.GetComponent<Collider>().bounds.size.y * 1 / 2;
+
+
+       transform.position = Vector3.SmoothDamp(transform.position, needPos,
+                                                ref velocity, 0f);
         transform.LookAt(objectToFollow.transform);
         transform.rotation = objectToFollow.transform.rotation;
+
     }
 }
