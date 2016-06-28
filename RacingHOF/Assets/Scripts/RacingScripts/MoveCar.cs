@@ -19,7 +19,7 @@ public class MoveCar : MonoBehaviour
 
     // The best line
     [SerializeField]
-    public GameObject bestLine;
+    public Transform bestLine;
 
     // Called at every physics steps
     public void FixedUpdate()
@@ -40,6 +40,60 @@ public class MoveCar : MonoBehaviour
         }
         else
             carSpeed = 0;
+
+        // We are looking for the closest waypoint in BestLine
+        Transform closestWayPoint = getClosestWayPointInFront();
+        if (closestWayPoint != null)
+        {
+            Debug.Log(closestWayPoint.name);
+
+            this.transform.position = closestWayPoint.position;
+        }
+
+
+    }
+
+    Transform getClosestWayPoint()
+    {
+        Transform tMin = null;
+        float minDist = Mathf.Infinity;
+        Vector3 currentPos = transform.position;
+
+        foreach (Transform wayPoint in bestLine)
+        {
+
+            float dist = Vector3.Distance(wayPoint.position, currentPos);
+            if (dist < minDist)
+            {
+                tMin = wayPoint;
+                minDist = dist;
+            }
+        }
+
+        return tMin;
+    }
+
+    Transform getClosestWayPointInFront()
+    {
+        Transform tMin = null;
+        float minDist = Mathf.Infinity;
+        Vector3 currentPos = transform.position;
+
+        foreach (Transform wayPoint in bestLine)
+        {
+            float angleCarWaypoint = Vector3.Angle(this.transform.forward, wayPoint.position - transform.position);
+            if (Mathf.Abs(angleCarWaypoint) < 90)
+            {
+                float dist = Vector3.Distance(wayPoint.position, currentPos);
+                if (dist < minDist && dist != 0)
+                {
+                    tMin = wayPoint;
+                    minDist = dist;
+                }
+            }
+        }
+
+        return tMin;
     }
 }
 
