@@ -48,6 +48,7 @@
      <Compile Include="Assets\Scripts\PlayerUpgrades.cs" />
      <Compile Include="Assets\Scripts\RacingScripts\CameraFollow.cs" />
      <Compile Include="Assets\Scripts\RacingScripts\EnnemyCar.cs" />
+     <Compile Include="Assets\Scripts\RacingScripts\GenerateRoad.cs" />
      <Compile Include="Assets\Scripts\RacingScripts\MoveCar.cs" />
      <Compile Include="Assets\Scripts\RacingScripts\WheelsScript.cs" />
      <Compile Include="Assets\Scripts\SceneChanger.cs" />
