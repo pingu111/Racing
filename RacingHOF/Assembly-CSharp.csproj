@@ -52,7 +52,9 @@
      <Compile Include="Assets\Scripts\RacingScripts\MoveCar.cs" />
      <Compile Include="Assets\Scripts\RacingScripts\WheelsScript.cs" />
      <Compile Include="Assets\Scripts\SceneChanger.cs" />
+     <None Include="Assets\readme.txt" />
      <None Include="Assets\Standard Assets\Vehicles\Car\Shaders\DiffuseReflectiveShader.shader" />
+     <None Include="Assets\Standard Assets\Skyboxes\_skybox info.txt" />
      <None Include="Assets\Standard Assets\Vehicles\Car\Shaders\ReflectiveDiffuseSpecTransp.shader" />
      <None Include="Assets\Standard Assets\Vehicles\Car\Shaders\ReflectiveDiffuseSpec.shader" />
      <None Include="Assets\Standard Assets\CrossPlatformInput\CrossPlatformInputGuidelines.txt" />
