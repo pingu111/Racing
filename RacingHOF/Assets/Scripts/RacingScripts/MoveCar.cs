@@ -19,22 +19,22 @@ public class MoveCar : MonoBehaviour
     // Called at every physics steps
     public void FixedUpdate()
     {
-        // We get the inputs
-        carSpeed = maxMotorTorque * Input.GetAxis("Vertical");
-        float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
-
-        foreach (GameObject wheel in listOfWheels)
+        // If we touche the screen, we move !
+        if (Input.touchCount > 0 || Input.GetAxis("Vertical") != 0)
         {
-            if (wheel.GetComponent<WheelsScript>().steering)
-            {
-                wheel.GetComponent<WheelCollider>().steerAngle = steering;
-            }
-            if (wheel.GetComponent<WheelsScript>().attachedToMotor)
-            {
-                wheel.GetComponent<WheelCollider>().motorTorque = carSpeed;
-            }
+            carSpeed = maxMotorTorque;
 
+            foreach (GameObject wheel in listOfWheels)
+            {
+                if (wheel.GetComponent<WheelsScript>().attachedToMotor)
+                {
+                    wheel.GetComponent<WheelCollider>().motorTorque = carSpeed;
+                }
+
+            }
         }
+        else
+            carSpeed = 0;
     }
 }
 
