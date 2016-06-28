@@ -45,55 +45,45 @@ public class MoveCar : MonoBehaviour
         Transform closestWayPoint = getClosestWayPointInFront();
         if (closestWayPoint != null)
         {
-            Debug.Log(closestWayPoint.name);
+            Debug.Log("Closest : "+closestWayPoint.name);
 
             this.transform.position = closestWayPoint.position;
+            Debug.Log("Position :"+this.transform.position);
+
+            this.transform.LookAt(getClosestWayPointInFront());
+            Debug.Log("Rotation to see the next one "+this.transform.localRotation);
         }
 
 
-    }
-
-    Transform getClosestWayPoint()
-    {
-        Transform tMin = null;
-        float minDist = Mathf.Infinity;
-        Vector3 currentPos = transform.position;
-
-        foreach (Transform wayPoint in bestLine)
-        {
-
-            float dist = Vector3.Distance(wayPoint.position, currentPos);
-            if (dist < minDist)
-            {
-                tMin = wayPoint;
-                minDist = dist;
-            }
-        }
-
-        return tMin;
     }
 
     Transform getClosestWayPointInFront()
     {
-        Transform tMin = null;
+        Transform wayPointMin = null;
         float minDist = Mathf.Infinity;
         Vector3 currentPos = transform.position;
 
         foreach (Transform wayPoint in bestLine)
         {
+            // We verify if the waypoint is in front of the car 
             float angleCarWaypoint = Vector3.Angle(this.transform.forward, wayPoint.position - transform.position);
             if (Mathf.Abs(angleCarWaypoint) < 90)
             {
                 float dist = Vector3.Distance(wayPoint.position, currentPos);
-                if (dist < minDist && dist != 0)
+
+                // If we're too close, we go to the next one 
+                if (dist < minDist && dist > 0.2f)
                 {
-                    tMin = wayPoint;
+                    wayPointMin = wayPoint;
                     minDist = dist;
                 }
             }
         }
 
-        return tMin;
+        Debug.Log("wayPointMin " + wayPointMin.name);
+        Debug.Log("minDist " + minDist);
+
+        return wayPointMin;
     }
 }
 
