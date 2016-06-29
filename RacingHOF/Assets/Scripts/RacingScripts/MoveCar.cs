@@ -41,22 +41,21 @@ public class MoveCar : MonoBehaviour
     // Called at every physics steps
     public void FixedUpdate()
     {
-        float brakeTorque = maxMotorTorque * 10;
         float motorTorque = 0;
 
         // If we touche the screen, we move !
         if (Input.touches.Length != 0 || Input.GetAxis("Vertical") != 0)
         {
-            brakeTorque = 0;
             motorTorque = maxMotorTorque;
         }
+        else
+            this.GetComponent<Rigidbody>().velocity *= 0.98f;
 
         // Update of the motor on the wheels and the brake
         foreach (GameObject wheel in listOfWheels)
         {
             if (wheel.GetComponent<WheelsScript>().attachedToMotor)
             {
-                wheel.GetComponent<WheelCollider>().brakeTorque = brakeTorque;
                 wheel.GetComponent<WheelCollider>().motorTorque = motorTorque;
             }
         }
