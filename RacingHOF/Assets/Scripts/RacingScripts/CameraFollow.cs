@@ -15,25 +15,21 @@ public class CameraFollow : MonoBehaviour {
     {
 	
 	}
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    void Update ()
     {
         // We follow the gameObject 
 
         Vector3 velocity = Vector3.zero;
         Vector3 needPos = objectToFollow.transform.position;
 
-        // We go back a little
-        needPos.z -= objectToFollow.transform.GetComponent<Collider>().bounds.size.z ;
-        needPos.y += objectToFollow.transform.GetComponent<Collider>().bounds.size.y * 1 / 2;
 
-
-        transform.position = Vector3.SmoothDamp(transform.position, needPos,
-                                                ref velocity, 0f);
+        transform.position = Vector3.SmoothDamp(transform.position, needPos, ref velocity, 0f);
         transform.rotation = objectToFollow.transform.rotation;
 
         transform.LookAt(objectToFollow.transform);
 
     }
 }
+

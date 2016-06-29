@@ -40,37 +40,40 @@ public class MoveCar : MonoBehaviour
         // If we touche the screen, we move !
         if (Input.touchCount > 0 || Input.GetAxis("Vertical") != 0)
         {
-            carSpeed = maxMotorTorque;
-
+            // Update of the wheels
             foreach (GameObject wheel in listOfWheels)
             {
                 if (wheel.GetComponent<WheelsScript>().attachedToMotor)
                 {
-                    wheel.GetComponent<WheelCollider>().motorTorque = carSpeed;
+                    wheel.GetComponent<WheelCollider>().brakeTorque = 0;
+                    wheel.GetComponent<WheelCollider>().motorTorque = maxMotorTorque;
                 }
 
             }
         }
         else
+        {
             carSpeed = 0;
+            // Update of the wheels
+            foreach (GameObject wheel in listOfWheels)
+            {
+                if (wheel.GetComponent<WheelsScript>().attachedToMotor)
+                {
+                    wheel.GetComponent<WheelCollider>().motorTorque = 0;
+                    wheel.GetComponent<WheelCollider>().brakeTorque = maxMotorTorque;
+
+                }
+
+            }
+        }
+
+      
 
         // We are looking for the closest waypoint in BestLine
         Transform closestWayPoint = getClosestWayPointInFront();
         if (closestWayPoint != null && nameLastWaypoint != closestWayPoint.name)
         {
-            // Make the car follow with teleportation
-
-            /* Debug.Log("Closest : "+closestWayPoint.name);
-             this.transform.position = closestWayPoint.position;
-             Debug.Log("Position :"+this.transform.position);
-
-             this.transform.LookAt(getClosestWayPointInFront());
-             Debug.Log("Rotation to see the next one "+this.transform.localRotation);*/
-
-            // We check if we have a good orientation
-            //float angleCarWaypoint = Vector3.Angle(closestWayPoint.position - transform.position,this.transform.forward);
-            //int sign = Vector3.Cross(closestWayPoint.position - transform.position, this.transform.forward).x < 0 ? -1 : 1;
-
+          
             float angleCarWaypoint= AngleSigned(this.transform.forward, closestWayPoint.position - transform.position, Vector3.up);
 
             Debug.Log("TARGET : "+closestWayPoint.name);
