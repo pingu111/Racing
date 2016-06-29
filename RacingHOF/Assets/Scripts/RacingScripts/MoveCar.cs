@@ -22,72 +22,66 @@ public class MoveCar : MonoBehaviour
     public float maxSteeringAngle;
 
     /// <summary>
-    /// the speed of this car
-    /// </summary>
-    public float carSpeed;
-
-    private string nameLastWaypoint;
-
-    /// <summary>
     /// The best line
     /// </summary>
     [SerializeField]
     public Transform bestLine;
 
+    /// <summary>
+    /// The number of the last waypoint that we must passed 
+    /// </summary>
+    private int idLastWaypoint;
+
     // Called at every physics steps
     public void FixedUpdate()
     {
         // If we touche the screen, we move !
-        if (Input.touchCount > 0 || Input.GetAxis("Vertical") != 0)
+         if (Input.touchCount > 0 || Input.GetAxis("Vertical") != 0)
+         {
+             // Update of the wheels
+             foreach (GameObject wheel in listOfWheels)
+             {
+                 if (wheel.GetComponent<WheelsScript>().attachedToMotor)
+                 {
+                     wheel.GetComponent<WheelCollider>().brakeTorque = 0;
+                     wheel.GetComponent<WheelCollider>().motorTorque = maxMotorTorque;
+                 }
+             }
+         }
+         else
+         {
+             // Update of the wheels
+             foreach (GameObject wheel in listOfWheels)
+             {
+                 if (wheel.GetComponent<WheelsScript>().attachedToMotor)
+                 {
+                     wheel.GetComponent<WheelCollider>().motorTorque = 0;
+                     wheel.GetComponent<WheelCollider>().brakeTorque = maxMotorTorque;
+                 }
+
+             }
+         }
+    
+        // We are looking for the closest waypoint in BestLine IF we passed the last one
+        if (isWaypointPassed(idLastWaypoint))
         {
-            // Update of the wheels
-            foreach (GameObject wheel in listOfWheels)
+            Transform closestWayPoint = getClosestWayPointInFront();
+            if (closestWayPoint != null)
             {
-                if (wheel.GetComponent<WheelsScript>().attachedToMotor)
-                {
-                    wheel.GetComponent<WheelCollider>().brakeTorque = 0;
-                    wheel.GetComponent<WheelCollider>().motorTorque = maxMotorTorque;
-                }
+                // We calculate the steering needed for the wheels
+                float angleCarWaypoint = AngleSigned(this.transform.forward, closestWayPoint.position - transform.position, Vector3.up);
 
-            }
-        }
-        else
-        {
-            carSpeed = 0;
-            // Update of the wheels
-            foreach (GameObject wheel in listOfWheels)
-            {
-                if (wheel.GetComponent<WheelsScript>().attachedToMotor)
+                Debug.Log("TARGET : " + closestWayPoint.name);
+                Debug.Log("angle : " + angleCarWaypoint);
+
+                foreach (GameObject wheel in listOfWheels)
                 {
-                    wheel.GetComponent<WheelCollider>().motorTorque = 0;
-                    wheel.GetComponent<WheelCollider>().brakeTorque = maxMotorTorque;
+                    if (wheel.GetComponent<WheelsScript>().steering)
+                    {
+                        wheel.GetComponent<WheelCollider>().steerAngle = angleCarWaypoint;
+                    }
 
                 }
-
-            }
-        }
-
-      
-
-        // We are looking for the closest waypoint in BestLine
-        Transform closestWayPoint = getClosestWayPointInFront();
-        if (closestWayPoint != null && nameLastWaypoint != closestWayPoint.name)
-        {
-          
-            float angleCarWaypoint= AngleSigned(this.transform.forward, closestWayPoint.position - transform.position, Vector3.up);
-
-            Debug.Log("TARGET : "+closestWayPoint.name);
-            Debug.Log("angle : " + angleCarWaypoint);
-
-            nameLastWaypoint = closestWayPoint.name;
-
-            foreach (GameObject wheel in listOfWheels)
-            {
-                if (wheel.GetComponent<WheelsScript>().steering)
-                {
-                    wheel.GetComponent<WheelCollider>().steerAngle = angleCarWaypoint;
-                }
-
             }
         }
     }
@@ -103,6 +97,9 @@ public class MoveCar : MonoBehaviour
         float minDist = Mathf.Infinity;
         Vector3 currentPos = transform.position;
 
+        int numberActualWayPoint = 0;
+        int numberClosestWayPoint = 0;
+
         foreach (Transform wayPoint in bestLine)
         {
             // We verify if the waypoint is in front of the car 
@@ -112,14 +109,26 @@ public class MoveCar : MonoBehaviour
                 float dist = Vector3.Distance(wayPoint.position, currentPos);
 
                 // If we touch it, we go to the next one
-                if (dist < minDist && 
-                    !wayPoint.GetComponent<Renderer>().bounds.Intersects(this.GetComponent<Collider>().bounds))
+                if (
+                        dist < minDist && // If it is closer than the best
+                        !wayPoint.GetComponent<Renderer>().bounds.Intersects(this.GetComponent<Collider>().bounds) && // If we don't touch it
+                        ( numberActualWayPoint > idLastWaypoint ) ||// If the ID is further than the last passed
+                        (( numberActualWayPoint < idLastWaypoint ) 
+                        && (numberActualWayPoint + idLastWaypoint > bestLine.childCount) 
+                        && (numberActualWayPoint > bestLine.childCount/2)
+                        && (idLastWaypoint < bestLine.childCount / 2)) // case for the end of the track
+                    ) 
                 {
                     wayPointMin = wayPoint;
                     minDist = dist;
+                    numberClosestWayPoint = numberActualWayPoint;
                 }
             }
+            numberActualWayPoint++;
         }
+
+        Debug.Log("idLastWaypoint " + idLastWaypoint + " / numberClosestWayPoint " + numberClosestWayPoint);
+        idLastWaypoint = numberClosestWayPoint;
         return wayPointMin;
     }
 
@@ -134,6 +143,20 @@ public class MoveCar : MonoBehaviour
                 Vector3.Dot(n, Vector3.Cross(v1, v2)),
                 Vector3.Dot(v1, v2)
                         ) * Mathf.Rad2Deg;
+    }
+
+    /// <summary>
+    /// Return if a waypoint is passed : 
+    /// true if behind the car OR if touched
+    /// </summary>
+    /// <param name="idWayPoint">The id of the waypoint to check</param>
+    /// <returns>true if behind the car OR if touched</returns>
+    bool isWaypointPassed(int idWayPoint)
+    {
+        float angleCarWaypoint = Vector3.Angle(this.transform.forward, bestLine.GetChild(idLastWaypoint).position - transform.position);
+
+        return ( Mathf.Abs(angleCarWaypoint) > 90 || 
+                bestLine.GetChild(idLastWaypoint).GetComponent<Renderer>().bounds.Intersects(this.GetComponent<Collider>().bounds) );
     }
 }
 
