@@ -3,21 +3,34 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class MoveCar : MonoBehaviour
-{
-    // the information about each individual axle
+{    
+    /// <summary>
+    /// the information about each individual wheel
+    /// </summary>
     [SerializeField]
     public List<GameObject> listOfWheels;
 
-    // maximum torque the motor can apply to wheel
+    /// <summary>
+    /// maximum torque the motor can apply to wheel
+    /// </summary>
+
     public float maxMotorTorque;
 
-    // maximum steer angle the wheel can have
+    /// <summary>
+    /// maximum steer angle the wheel can have
+    /// </summary>
     public float maxSteeringAngle;
 
-    // the speed of this car
+    /// <summary>
+    /// the speed of this car
+    /// </summary>
     public float carSpeed;
 
-    // The best line
+    private string nameLastWaypoint;
+
+    /// <summary>
+    /// The best line
+    /// </summary>
     [SerializeField]
     public Transform bestLine;
 
@@ -43,7 +56,7 @@ public class MoveCar : MonoBehaviour
 
         // We are looking for the closest waypoint in BestLine
         Transform closestWayPoint = getClosestWayPointInFront();
-        if (closestWayPoint != null)
+        if (closestWayPoint != null && nameLastWaypoint != closestWayPoint.name)
         {
             // Make the car follow with teleportation
 
@@ -55,10 +68,15 @@ public class MoveCar : MonoBehaviour
              Debug.Log("Rotation to see the next one "+this.transform.localRotation);*/
 
             // We check if we have a good orientation
-            float angleCarWaypoint = Vector3.Angle(this.transform.forward, closestWayPoint.position - transform.position);
+            //float angleCarWaypoint = Vector3.Angle(closestWayPoint.position - transform.position,this.transform.forward);
+            //int sign = Vector3.Cross(closestWayPoint.position - transform.position, this.transform.forward).x < 0 ? -1 : 1;
+
+            float angleCarWaypoint= AngleSigned(this.transform.forward, closestWayPoint.position - transform.position, Vector3.up);
 
             Debug.Log("TARGET : "+closestWayPoint.name);
             Debug.Log("angle : " + angleCarWaypoint);
+
+            nameLastWaypoint = closestWayPoint.name;
 
             foreach (GameObject wheel in listOfWheels)
             {
@@ -70,6 +88,11 @@ public class MoveCar : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// Return  the closest waypoint, in the list bestLine, from the car.
+    /// It can't be a waypoint in contact with the car
+    /// </summary>
 
     Transform getClosestWayPointInFront()
     {
@@ -94,9 +117,20 @@ public class MoveCar : MonoBehaviour
                 }
             }
         }
-        Debug.Log("minDist " + minDist);
-
         return wayPointMin;
+    }
+
+    /// <summary>
+    /// Determine the signed angle between two vectors, with normal 'n'
+    /// as the rotation axis.
+    /// </summary>
+    public static float AngleSigned(Vector3 v1, Vector3 v2, Vector3 n)
+    {
+        return 
+            Mathf.Atan2(
+                Vector3.Dot(n, Vector3.Cross(v1, v2)),
+                Vector3.Dot(v1, v2)
+                        ) * Mathf.Rad2Deg;
     }
 }
 
