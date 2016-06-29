@@ -3,15 +3,15 @@ using System.Collections;
 
 public class WheelsScript : MonoBehaviour {
 
-    // is this wheel left or right ?
+    /// is this wheel left or right ?
     [SerializeField]
     public bool isLeft;
 
-    // is this wheel attached to motor?
+    /// is this wheel attached to motor?
     [SerializeField]
     public bool attachedToMotor;
 
-    // does the steer apply to this wheel ?
+    /// does the steer apply to this wheel ?
     [SerializeField]
     public bool steering;
 

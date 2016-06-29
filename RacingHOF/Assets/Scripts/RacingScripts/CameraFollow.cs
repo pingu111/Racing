@@ -29,10 +29,11 @@ public class CameraFollow : MonoBehaviour {
         needPos.y += objectToFollow.transform.GetComponent<Collider>().bounds.size.y * 1 / 2;
 
 
-       transform.position = Vector3.SmoothDamp(transform.position, needPos,
+        transform.position = Vector3.SmoothDamp(transform.position, needPos,
                                                 ref velocity, 0f);
-        transform.LookAt(objectToFollow.transform);
         transform.rotation = objectToFollow.transform.rotation;
+
+        transform.LookAt(objectToFollow.transform);
 
     }
 }
