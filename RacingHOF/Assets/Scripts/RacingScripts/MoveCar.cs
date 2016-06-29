@@ -41,30 +41,23 @@ public class MoveCar : MonoBehaviour
     // Called at every physics steps
     public void FixedUpdate()
     {
-        // If we touche the screen, we move !
-        if (Input.touchCount > 0 || Input.GetAxis("Vertical") != 0)
-        {
-             // Update of the wheels
-             foreach (GameObject wheel in listOfWheels)
-             {
-                 if (wheel.GetComponent<WheelsScript>().attachedToMotor)
-                 {
-                     wheel.GetComponent<WheelCollider>().brakeTorque = 0;
-                     wheel.GetComponent<WheelCollider>().motorTorque = maxMotorTorque;
-                 }
-             }
-        }
-        else
-        {
-            // Update of the wheels
-            foreach (GameObject wheel in listOfWheels)
-            {
-                if (wheel.GetComponent<WheelsScript>().attachedToMotor)
-                {
-                    wheel.GetComponent<WheelCollider>().motorTorque = 0;
-                    wheel.GetComponent<WheelCollider>().brakeTorque = maxMotorTorque*10;
-                }
+        float brakeTorque = maxMotorTorque * 10;
+        float motorTorque = 0;
 
+        // If we touche the screen, we move !
+        if (Input.touches.Length != 0 || Input.GetAxis("Vertical") != 0)
+        {
+            brakeTorque = 0;
+            motorTorque = maxMotorTorque;
+        }
+
+        // Update of the motor on the wheels and the brake
+        foreach (GameObject wheel in listOfWheels)
+        {
+            if (wheel.GetComponent<WheelsScript>().attachedToMotor)
+            {
+                wheel.GetComponent<WheelCollider>().brakeTorque = brakeTorque;
+                wheel.GetComponent<WheelCollider>().motorTorque = motorTorque;
             }
         }
 
@@ -72,23 +65,24 @@ public class MoveCar : MonoBehaviour
         if (isWaypointPassed(idLastWaypoint))
         {
             closestWayPoint = getClosestWayPointInFront();
+        }
 
-            // We calculate the steering needed for the wheels
-            if (closestWayPoint != null)
+        // Update of the steerAngle of the wheels
+        if (closestWayPoint != null)
+        {
+            float angleCarWaypoint = AngleSigned(this.transform.forward, closestWayPoint.position - transform.position, Vector3.up);
+
+           // Debug.Log("TARGET : " + closestWayPoint.name);
+
+            foreach (GameObject wheel in listOfWheels)
             {
-                float angleCarWaypoint = AngleSigned(this.transform.forward, closestWayPoint.position - transform.position, Vector3.up);
-
-                Debug.Log("TARGET : " + closestWayPoint.name);
-
-                foreach (GameObject wheel in listOfWheels)
+                if (wheel.GetComponent<WheelsScript>().steering)
                 {
-                    if (wheel.GetComponent<WheelsScript>().steering)
-                    {
-                        wheel.GetComponent<WheelCollider>().steerAngle = angleCarWaypoint;
-                    }
+                    wheel.GetComponent<WheelCollider>().steerAngle = angleCarWaypoint;
+                   // Debug.Log("MAJ STEER ANGLE " + wheel.GetComponent<WheelCollider>().steerAngle);
                 }
             }
-        }       
+        }
     }
 
     /// <summary>
@@ -119,11 +113,10 @@ public class MoveCar : MonoBehaviour
                         &&  !wayPoint.GetComponent<Renderer>().bounds.Intersects(this.GetComponent<Collider>().bounds) // If we don't touch it
                         && 
                         (
-                            // If the ID is further than the last passed
-                            ((numberActualWayPoint > idLastWaypoint ) 
-                            && (Mathf.Abs(idLastWaypoint - numberActualWayPoint) < bestLine.childCount / 10) ) 
+                            ((numberActualWayPoint > idLastWaypoint)  // If the ID is further than the last passed
+                            && (Mathf.Abs(idLastWaypoint - numberActualWayPoint) < bestLine.childCount / 10) ) // If it's not too far away
                             ||
-                            // case for the end of the track : if we go from n°80 to n°1
+                            // case for the end of the track : if we go from n°80 to n°1 by exemple
                             ((numberActualWayPoint < idLastWaypoint ) 
                             && (numberActualWayPoint + idLastWaypoint > bestLine.childCount) 
                             && (idLastWaypoint > bestLine.childCount * 5/6) 
@@ -141,12 +134,12 @@ public class MoveCar : MonoBehaviour
 
         if (numberClosestWayPoint == -1) // Then, we can't see any new waypoint : time to go to the last one
         {
-            Debug.Log("Can't see anything, go to " + (idLastWaypoint +2));
+            //Debug.Log("Can't see anything, go to " + (idLastWaypoint +2));
             numberClosestWayPoint = idLastWaypoint + 2;
             if (numberClosestWayPoint >= bestLine.childCount)
                 numberClosestWayPoint -= bestLine.childCount;
         }
-        Debug.Log("idLastWaypoint " + idLastWaypoint + " / numberClosestWayPoint " + numberClosestWayPoint);
+        //Debug.Log("idLastWaypoint " + idLastWaypoint + " / numberClosestWayPoint " + numberClosestWayPoint);
 
         idLastWaypoint = numberClosestWayPoint;
         return wayPointMin;
@@ -174,11 +167,9 @@ public class MoveCar : MonoBehaviour
     bool isWaypointPassed(int idWayPoint)
     {
         float angleCarWaypoint = Vector3.Angle(this.transform.forward, bestLine.GetChild(idLastWaypoint).position - transform.position);
-        if((Mathf.Abs(angleCarWaypoint) > 120 ||
-                bestLine.GetChild(idLastWaypoint).GetComponent<Renderer>().bounds.Intersects(this.GetComponent<Collider>().bounds)))
-            Debug.Log(idWayPoint + " passé ");
+       // if((Mathf.Abs(angleCarWaypoint) > 60 || bestLine.GetChild(idLastWaypoint).GetComponent<Renderer>().bounds.Intersects(this.GetComponent<Collider>().bounds))) Debug.Log(idWayPoint + " passé ");
 
-        return ( Mathf.Abs(angleCarWaypoint) > 120 || 
+        return ( Mathf.Abs(angleCarWaypoint) > 60 || 
                 bestLine.GetChild(idLastWaypoint).GetComponent<Renderer>().bounds.Intersects(this.GetComponent<Collider>().bounds) );
     }
 }
